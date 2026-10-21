@@ -1,0 +1,21 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+      - run: pip install -r requirements.txt
+      # train.csv / test.csv / smalltrain.csv are not in the repository, so the
+      # notebook cannot be executed here; its format is validated instead.
+      - name: Validate the notebook with nbformat
+        run: python -c "import nbformat; nb = nbformat.read('Lab1-Final.ipynb', as_version=4); nbformat.validate(nb); print('valid notebook,', len(nb.cells), 'cells')"
