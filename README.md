@@ -1,5 +1,7 @@
 # Wetland Detection with Classical ML
 
+[![CI](https://github.com/rohanreddy79/Wetland-Detection-ML/actions/workflows/ci.yml/badge.svg)](https://github.com/rohanreddy79/Wetland-Detection-ML/actions/workflows/ci.yml)
+
 **A scikit-learn lab notebook that classifies land samples as wetland or dry land from four spectral bands and compares a decision tree, logistic regression, an SVM, bagging and a random forest on the same test set.**
 
 ## Overview
@@ -32,7 +34,9 @@ is a misleading metric), so it reads as a completed course lab rather than a sta
 | File | Purpose |
 | --- | --- |
 | `Lab1-Final.ipynb` | The whole pipeline: data loading, five classifiers, metrics, written answer on metric choice |
-| `train.csv`, `test.csv`, `smalltrain.csv` | Expected next to the notebook; **not included in this repository** |
+| `train.csv`, `test.csv`, `smalltrain.csv` | Expected next to the notebook; **not included in this repository** (see "Running it") |
+| `requirements.txt` | Pinned pandas, scikit-learn 1.9.1 and the nbformat/nbconvert/ipykernel runtime |
+| `.github/workflows/ci.yml` | Installs the requirements and validates the notebook with nbformat (cannot execute it: no data) |
 
 Pipeline: CSV -> `DataFrame` with columns `near infra red`, `red`, `green`, `blue`, `class` ->
 feature/label split -> fit model -> predict on the test file -> four scikit-learn metrics printed.
@@ -57,21 +61,38 @@ the notebook; the SVM has the highest wetland recall (0.867), bagging the highes
 
 ## Running it
 
-The three CSV files are not committed, so you need them beside the notebook first. Then:
+### Where the data must go
+
+The three CSV files were never published with the notebook and nothing here downloads or
+fabricates them. Put `train.csv`, `test.csv` and `smalltrain.csv` in the repository root, next to
+`Lab1-Final.ipynb`, in the form the notebook reads (`pd.read_csv("train.csv", header=None, ...)`):
+no header row, five comma-separated integer columns per line (near-infrared, red, green, blue,
+class with `0` = dry land and `1` = wetland), e.g. `123,132,115,133,0`.
+
+### Commands
 
 ```bash
-pip install pandas scikit-learn jupyter
-jupyter notebook Lab1-Final.ipynb
+python -m venv .venv && source .venv/bin/activate
+pip install -r requirements.txt            # pandas, scikit-learn 1.9.1, nbformat/nbconvert/ipykernel
+pip install notebook && jupyter notebook Lab1-Final.ipynb
 ```
 
-or, without touching the notebook in place:
+or headless, leaving the committed notebook untouched:
 
 ```bash
-uv run --with pandas,scikit-learn,nbconvert,ipykernel \
-  jupyter nbconvert --to notebook --execute Lab1-Final.ipynb --output executed.ipynb
+jupyter nbconvert --to notebook --execute Lab1-Final.ipynb --output executed.ipynb
 ```
 
-Not verified on this machine: the data files are absent, so the notebook was only read, not re-run.
+Verified on this machine (2026-10, Python 3.12.12): the pinned requirements install, and
+`python -c "import nbformat; nbformat.validate(nbformat.read('Lab1-Final.ipynb', as_version=4))"`
+passes (`valid notebook, 20 cells`). Not verified: executing the notebook, because the data
+files are absent; CI validates the format only, for the same reason.
+
+## Changelog
+
+- 2026-10: added pinned `requirements.txt`, MIT license, `.gitignore` and an nbformat-validation
+  CI; documented where the CSV files must be placed. No code changes: without the data nothing
+  could be executed, so nothing was altered.
 
 ## Limitations / Notes
 
